@@ -1,0 +1,88 @@
+[
+  {
+    "KEY_1": {
+      "adapter": "RelativeCommandRunner",
+      "command": ""
+    },
+    "KEY_2": {
+      "adapter": "RelativeCommandRunner",
+      "command": ""
+    },
+    "KEY_3": {
+      "adapter": "RelativeCommandRunner",
+      "command": ""
+    },
+    "KEY_4": {
+      "adapter": "RelativeCommandRunner",
+      "command": ""
+    },
+    "KEY_8": null,
+    "KEY_7": null,
+    "KEY_6": null,
+    "KEY_5": null,
+    "KEY_9": null,
+    "KEY_0": null,
+    "KEY_A": null,
+    "KEY_B": null,
+    "KEY_F": null,
+    "KEY_E": null,
+    "KEY_D": null,
+    "KEY_C": null,
+    "KEY_G": null,
+    "KEY_H": null,
+    "KEY_I": null,
+    "KEY_J": null,
+    "KEY_N": {
+      "adapter": "PadLocker",
+      "deltaseconds": 3
+    },
+    "KEY_M": null,
+    "KEY_L": null,
+    "KEY_K": {
+      "adapter": "InterfaceChanger"
+    }
+  },
+  {
+    "KEY_1": {
+      "adapter": "RelativeCommandRunner",
+      "command": ""
+    },
+    "KEY_2": {
+      "adapter": "RelativeCommandRunner",
+      "command": ""
+    },
+    "KEY_3": {
+      "adapter": "RelativeCommandRunner",
+      "command": ""
+    },
+    "KEY_4": {
+      "adapter": "RelativeCommandRunner",
+      "command": ""
+    },
+    "KEY_8": null,
+    "KEY_7": null,
+    "KEY_6": null,
+    "KEY_5": null,
+    "KEY_9": null,
+    "KEY_0": null,
+    "KEY_A": null,
+    "KEY_B": null,
+    "KEY_F": null,
+    "KEY_E": null,
+    "KEY_D": null,
+    "KEY_C": null,
+    "KEY_G": null,
+    "KEY_H": null,
+    "KEY_I": null,
+    "KEY_J": null,
+    "KEY_N": {
+      "adapter": "PadLocker",
+      "deltaseconds": 3
+    },
+    "KEY_M": null,
+    "KEY_L": null,
+    "KEY_K": {
+      "adapter": "InterfaceChanger"
+    }
+  }
+]
