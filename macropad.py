@@ -8,18 +8,22 @@ from sys import argv, exit
 
 
 class MacroPad(object):
-    def __init__(self, device_path, action_pages_file):
+    def __init__(self, device_path, locked=False):
         super(MacroPad, self).__init__()
-        self.actions = self.get_action_map(action_pages_file)
-        self.device = InputDevice(argv[1])
+        self.actions = []
+        self.device = InputDevice(device_path)
         self.grab()
         self.context = {
             "interface_no": 0,
             "action_page_count": len(self.actions),
             "hold_start": None,
             "hold_lock": False,
-            "locked": True,
+            "locked": locked,
         }
+
+    def initialize_actions(self, action_pages_file):
+        self.actions = self.get_action_map(action_pages_file)
+        self.context["action_page_count"] = len(self.actions)
 
     def grab(self):
         self.device.grab()
@@ -71,18 +75,9 @@ class MacroPad(object):
                     if action is not None:
                         action.hold(self.context)
 
-
-if __name__ == '__main__':
-    if len(argv) == 1:
-        exit()
-    elif len(argv) == 2:
-        action_pages_file = './action_pages.json'
-    else:
-        action_pages_file = argv[2]
-
-    mp = MacroPad(argv[1], action_pages_file)
-
-    try:
-        mp.main_loop()
-    except KeyboardInterrupt:
-        pass
+    def echo(self):
+        for event in self.device.read_loop():
+            if event.type == ecodes.EV_KEY:
+                key = categorize(event)
+                if key.keystate == key.key_up:
+                    print(key.keycode)
