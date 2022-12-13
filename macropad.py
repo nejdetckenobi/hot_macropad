@@ -81,3 +81,21 @@ class MacroPad(object):
                 key = categorize(event)
                 if key.keystate == key.key_up:
                     print(key.keycode)
+
+    def prepare_config_with_listen(self, file_path=None):
+        keys = set()
+        try:
+            for event in self.device.read_loop():
+                if event.type == ecodes.EV_KEY:
+                    key = categorize(event)
+                    if key.keystate == key.key_up:
+                        keys.add(key.keycode)
+        except KeyboardInterrupt:
+            pass
+        result = [dict.fromkeys(sorted(keys))]
+        if file_path is None:
+            print(json.dumps(result, indent=4, ensure_ascii=False))
+        else:
+            with open(file_path, "w") as f:
+                json.dump(result, f, indent=4, ensure_ascii=False)
+
