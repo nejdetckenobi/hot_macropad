@@ -41,8 +41,8 @@ class MacroPad(object):
             for key_code, adapter_data in page_data.items():
                 if adapter_data is None:
                     continue
-                adapter_name = adapter_data.pop('adapter')
-                adapter = get_adapter(adapter_name)
+                adapter_file, adapter_name = adapter_data.pop('adapter').rsplit('.', 1)
+                adapter = get_adapter(adapter_file, adapter_name)
                 page[key_code] = adapter(**adapter_data)
         return actions
 
