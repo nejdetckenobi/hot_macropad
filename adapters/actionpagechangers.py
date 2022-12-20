@@ -26,7 +26,7 @@ class ActionPageSetter(ReleaseExecuteAction):
     def run(self, context=None):
         if context["locked"]:
             return
-        if self.page_number > context["action_page_count"]:
+        if self.page_number < context["action_page_count"]:
             context["interface_no"] = self.page_number
         super(ActionPageSetter, self).run(context=context)
 
