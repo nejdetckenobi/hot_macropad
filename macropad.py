@@ -112,6 +112,14 @@ class BaseMacroPadRunner(BaseMacroPadListener):
                         action.hold(self.context)
 
 
+class MacroPadListener(BaseMacroPadListener):
+    pass
+
+
+class MacroPadConfigurer(BaseMacropadConfigurer):
+    pass
+
+
 class MacroPadRunner(BaseMacroPadRunner):
     pass
 

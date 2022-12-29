@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 
-from macropad import MacroPadRunner
 
 parser = ArgumentParser(description="This is the cli part of hot_macropad")
 
@@ -32,17 +31,20 @@ args = parser.parse_args()
 
 
 if args.subcommand == "listen":
-    mp = MacroPadRunner(device_path=args.device)
+    from macropad import MacroPadListener
+    mp = MacroPadListener(device_path=args.device)
     try:
         mp.echo()
     except KeyboardInterrupt:
         pass
 
 elif args.subcommand == "configure":
-    mp = MacroPadRunner(device_path=args.device)
+    from macropad import MacroPadConfigurer
+    mp = MacroPadConfigurer(device_path=args.device)
     mp.prepare_config_with_listen(args.output_file, page_count=args.page_count)
 
 elif args.subcommand == "run":
+    from macropad import MacroPadRunner
     mp = MacroPadRunner(device_path=args.device, locked=args.start_locked)
     mp.initialize_actions(args.config_file)
     try:
