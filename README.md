@@ -1,9 +1,12 @@
 # hot_macropad: A project that allows you to make any keyboard a macropad
 
 This project is for making macro pads from keyboards or keyboard-like devices.
+It is a concept that allows users to store the configuration of their macropads in their PCs.
+It's beneficial because by using that you don't need a reconfiguration when you replace your macropad.
+You can put your configuration file in to your `dotfiles` repository and you're done!
 
-No install script at the moment. Just clone the project.
-
+Since it's under heavy-development, there's no install script at the moment. 
+Just clone the project.
 
 ## How to configure
 
