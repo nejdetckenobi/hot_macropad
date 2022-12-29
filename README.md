@@ -60,7 +60,7 @@ No install script at the moment. Just clone the project.
   You should notice that you already saw these key codes in the previous step.
   You should see `null` right next to every key code.
 
-- Change the `null` values according to the [configuration section](#configuration options)
+- Change the `null` values according to the [configuration section](configuration-options)
   
 
 # Configuration Options
