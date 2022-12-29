@@ -74,9 +74,11 @@ You can use them or write your own adapter.
 Replace the value for the desired key code in your action pages like below.
 
 ```json
-  {
+{
   "adapter": XXX,
-  "parameter1": parameter1_value
+  "parameter1": YYY,
+  "parameter2": ZZZ,
+  ...
 }
 ```
 
@@ -87,7 +89,7 @@ After that, run the cli in the `run` mode.
 
 Here are the list of the adapters available to use.
 
-| `adapter` value | parameters | Note |
+| `adapter` value (XXX) | parameters (XXX, YYY, ...) | Note |
 |-----------------|------------|------|
 | `actionpagechangers.NextActionPage` | - | It sets your action page to the next one. If you're at the last page, you'll be taken to the first one. |
 | `actionpagechangers.PreviousActionPage` | - | It sets your action page to the previous one. If you're at the first page, you'll be taken to the last one. |
