@@ -66,13 +66,13 @@ Just clone the project.
 - Change the `null` values according to the [configuration section](#configuration-options)
 
 
-# Configuration Options
+## Configuration Options
 
 This is the place you should be looking to configure your device's behaviours.
 We have adapters that allows you to control various things.
 You can use them or write your own adapter.
 
-## Using an adapter
+### Using an adapter
 
 Replace the value for the desired key code in your action pages like below.
 
@@ -88,7 +88,7 @@ Replace the value for the desired key code in your action pages like below.
 After that, run the cli in the `run` mode.
 
 
-## Default Adapters
+### Default Adapters
 
 Here are the list of the adapters available to use.
 
@@ -101,7 +101,7 @@ Here are the list of the adapters available to use.
 | `commandrunners.CommandPasteAndReturn` | `command`: The command you want to run when you release the key | Runs the command specified as `command`. Provides no output. |
 | `padlocker.PadLocker` | `deltaseconds`: The time you should hold in seconds to invoke something | Locks/Unlocks the device when you press and hold the button for `deltaseconds`. |
 
-## Writing your own Adapter
+### Writing your own Adapter
 
 We have base classes for each key event: Press, Hold, Relase.
 
