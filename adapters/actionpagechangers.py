@@ -1,9 +1,9 @@
 from adapters.base import ReleaseExecuteAction
 
 
-class ActionPageIterator(ReleaseExecuteAction):
+class NextActionPage(ReleaseExecuteAction):
     def __init__(self):
-        super(ActionPageIterator, self).__init__()
+        super(NextActionPage, self).__init__()
         self.content = ""
 
     def run(self, context=None):
@@ -12,7 +12,24 @@ class ActionPageIterator(ReleaseExecuteAction):
         c = context
         c["interface_no"] = (c["interface_no"] + 1) % c["action_page_count"]
         self.content = c["interface_no"]
-        super(ActionPageIterator, self).run(context=context)
+        super(NextActionPage, self).run(context=context)
+
+    def __repr__(self):
+        return "{}({})".format(self.__class__.__name__, self.content)
+
+
+class PreviousActionPage(ReleaseExecuteAction):
+    def __init__(self):
+        super(PreviousActionPage, self).__init__()
+        self.content = ""
+
+    def run(self, context=None):
+        if context["locked"]:
+            return
+        c = context
+        c["interface_no"] = (c["interface_no"] - 1) % c["action_page_count"]
+        self.content = c["interface_no"]
+        super(PreviousActionPage, self).run(context=context)
 
     def __repr__(self):
         return "{}({})".format(self.__class__.__name__, self.content)
