@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from macropad import MacroPad
+from macropad import MacroPadRunner
 
 parser = ArgumentParser(description="This is the cli part of hot_macropad")
 
@@ -15,27 +15,35 @@ listen_parser.add_argument("-d", "--device", type=str, required=True, help="Devi
 
 configure_parser.add_argument("-o", "--output-file", type=str,
                               help="Output file for configuration. If not specified, the output will be printed to STDOUT")
-configure_parser.add_argument("-d", "--device", type=str, required=True, help="Device interface path")
-
-run_parser.add_argument("-d", "--device", type=str, required=True, help="Device interface path")
-run_parser.add_argument("-c", "--config-file", type=str, required=True, help="Action pages path")
-run_parser.add_argument("-l", "--start-locked", action="store_true")
+configure_parser.add_argument("-d", "--device", type=str, required=True,
+                              help="Device interface path")
+configure_parser.add_argument("-c", "--page-count", type=int, default=1,
+                              help="Decides how many pages should be created for configuration")
+# configure_parser.add_argument("-a", "--add-page", action="store_true",
+#                               help="Add a new page to the existing action pages file.")
+run_parser.add_argument("-d", "--device", type=str, required=True,
+                        help="Device interface path")
+run_parser.add_argument("-c", "--config-file", type=str, required=True,
+                        help="Action pages path")
+run_parser.add_argument("-l", "--start-locked", action="store_true",
+                        help="Start keypad software as locked. Be sure your first action page contains a PadLocker")
 
 args = parser.parse_args()
 
 
 if args.subcommand == "listen":
-    mp = MacroPad(device_path=args.device)
+    mp = MacroPadRunner(device_path=args.device)
     try:
         mp.echo()
     except KeyboardInterrupt:
         pass
 
 elif args.subcommand == "configure":
-    mp = MacroPad(device_path=args.device)
-    mp.prepare_config_with_listen(args.output_file)
+    mp = MacroPadRunner(device_path=args.device)
+    mp.prepare_config_with_listen(args.output_file, page_count=args.page_count)
+
 elif args.subcommand == "run":
-    mp = MacroPad(device_path=args.device, locked=args.start_locked)
+    mp = MacroPadRunner(device_path=args.device, locked=args.start_locked)
     mp.initialize_actions(args.config_file)
     try:
         mp.main_loop()
