@@ -16,4 +16,4 @@ class Typer(ReleaseExecuteAction):
         super(Typer, self).run(context=context)
 
     def __repr__(self):
-        return "{}(\"{}\")".format(self.__class__.__name__, self.command)
+        return "{}(\"{}\")".format(self.__class__.__name__, self.command.strip())

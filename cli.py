@@ -1,4 +1,15 @@
 from argparse import ArgumentParser
+from watchfiles import run_process
+
+
+def run_cli(args):
+    from macropad import MacroPadRunner
+    mp = MacroPadRunner(device_path=args.device, locked=args.start_locked)
+    mp.initialize_actions(args.config_file)
+    try:
+        mp.main_loop()
+    except KeyboardInterrupt:
+        pass
 
 
 parser = ArgumentParser(description="This is the cli part of hot_macropad")
@@ -29,26 +40,19 @@ run_parser.add_argument("-l", "--start-locked", action="store_true",
 
 args = parser.parse_args()
 
+if __name__ == '__main__':
+    if args.subcommand == "listen":
+        from macropad import MacroPadListener
+        mp = MacroPadListener(device_path=args.device)
+        try:
+            mp.echo()
+        except KeyboardInterrupt:
+            pass
 
-if args.subcommand == "listen":
-    from macropad import MacroPadListener
-    mp = MacroPadListener(device_path=args.device)
-    try:
-        mp.echo()
-    except KeyboardInterrupt:
-        pass
+    elif args.subcommand == "configure":
+        from macropad import MacroPadConfigurer
+        mp = MacroPadConfigurer(device_path=args.device)
+        mp.prepare_config_with_listen(args.output_file, page_count=args.page_count)
 
-elif args.subcommand == "configure":
-    from macropad import MacroPadConfigurer
-    mp = MacroPadConfigurer(device_path=args.device)
-    mp.prepare_config_with_listen(args.output_file, page_count=args.page_count)
-
-elif args.subcommand == "run":
-    from macropad import MacroPadRunner
-    mp = MacroPadRunner(device_path=args.device, locked=args.start_locked)
-    mp.initialize_actions(args.config_file)
-    try:
-        mp.main_loop()
-    except KeyboardInterrupt:
-        pass
-
+    elif args.subcommand == "run":
+        run_process(args.config_file, target=run_cli, args=(args,))
