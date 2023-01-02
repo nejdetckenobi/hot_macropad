@@ -92,7 +92,7 @@ class BaseMacroPadRunner(BaseMacroPadListener):
                     if self.context["locked"]:
                         pass
                     elif action is None:
-                        print("No release action specified for", key.keycode,
+                        print("No action specified for", key.keycode,
                               "press in action page:", self.context["interface_no"])
                     else:
                         action.press(self.context)
@@ -103,7 +103,7 @@ class BaseMacroPadRunner(BaseMacroPadListener):
                     if self.context["locked"]:
                         pass
                     elif action is None:
-                        print("No release action specified for", key.keycode,
+                        print("No action specified for", key.keycode,
                               "release in action page:", self.context["interface_no"])
                     else:
                         action.release(self.context)
