@@ -1,0 +1,4 @@
+SUBSYSTEMS=="usb" \
+, ENV{DISPLAY}=":0.0" \
+, ENV{XAUTHORITY}="/home/kenobi/.Xauthority" \
+, RUN+="/home/kenobi/Projects/hot/on_plug_in.sh"
