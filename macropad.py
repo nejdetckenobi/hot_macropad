@@ -38,7 +38,7 @@ class BaseMacropadConfigurer(BaseMacropadDevice):
                         keys.add(key.keycode)
         except KeyboardInterrupt:
             pass
-        result = [dict.fromkeys(sorted(keys)) for _ in range(page_count)]
+        result = {"page{}".format(i): dict.fromkeys(sorted(keys)) for i in range(page_count)}
         if file_path is None:
             print("\n" + json.dumps(result, indent=4, ensure_ascii=False))
         else:
@@ -47,12 +47,12 @@ class BaseMacropadConfigurer(BaseMacropadDevice):
 
 
 class BaseMacroPadRunner(BaseMacroPadListener):
-    def __init__(self, device_path, locked=False):
+    def __init__(self, device_path, locked=False, start_page_name=None):
         super(BaseMacroPadRunner, self).__init__(device_path)
-        self.actions = []
+        self.actions = {}
         self.context = {
-            "interface_no": 0,
-            "action_page_count": len(self.actions),
+            "actions": self.actions,
+            "action_page_name": start_page_name,
             "hold_start": None,
             "hold_lock": False,
             "locked": locked,
@@ -60,18 +60,18 @@ class BaseMacroPadRunner(BaseMacroPadListener):
 
     def initialize_actions(self, action_pages_file):
         self.actions = self.get_action_map(action_pages_file)
-        self.context["action_page_count"] = len(self.actions)
+        self.context["actions"] = self.actions
 
     @staticmethod
     def get_action_map(file_path):
-        actions = []
+        actions = {}
 
         with open(file_path) as f:
             data = json.load(f)
 
-        for page_data in data:
+        for page_name, page_data in data.items():
             page = {}
-            actions.append(page)
+            actions[page_name] = page
             for key_code, adapter_data in page_data.items():
                 if adapter_data is None:
                     continue
@@ -81,35 +81,38 @@ class BaseMacroPadRunner(BaseMacroPadListener):
         return actions
 
     def main_loop(self):
-        for event in self.device.read_loop():
-            if event.type == ecodes.EV_KEY:
-                key = categorize(event)
+        event_source = self.device.read_loop()
+        while True:
+            event = next(event_source)
+            if event.type != ecodes.EV_KEY:
+                continue
+            key = categorize(event)
 
-                action = self.actions[self.context["interface_no"]].get(key.keycode)
-                if key.keystate == key.key_down:
-                    self.context["hold_start"] = datetime.now()
+            action = self.actions.get(self.context["action_page_name"], {}).get(key.keycode)
+            if key.keystate == key.key_down:
+                self.context["hold_start"] = datetime.now()
 
-                    if self.context["locked"]:
-                        pass
-                    elif action is None:
-                        print("No action specified for", key.keycode,
-                              "press in action page:", self.context["interface_no"])
-                    else:
-                        action.press(self.context)
-                elif key.keystate == key.key_up:
-                    self.context["hold_start"] = None
-                    self.context["hold_lock"] = False
+                if self.context["locked"]:
+                    pass
+                elif action is None:
+                    print("No action specified for", key.keycode,
+                          "press in action page:", self.context["action_page_name"])
+                else:
+                    action.press(self.context)
+            elif key.keystate == key.key_up:
+                self.context["hold_start"] = None
+                self.context["hold_lock"] = False
 
-                    if self.context["locked"]:
-                        pass
-                    elif action is None:
-                        print("No action specified for", key.keycode,
-                              "release in action page:", self.context["interface_no"])
-                    else:
-                        action.release(self.context)
-                elif key.keystate == key.key_hold:
-                    if action is not None:
-                        action.hold(self.context)
+                if self.context["locked"]:
+                    pass
+                elif action is None:
+                    print("No action specified for", key.keycode,
+                          "release in action page:", self.context["action_page_name"])
+                else:
+                    action.release(self.context)
+            elif key.keystate == key.key_hold:
+                if action is not None:
+                    action.hold(self.context)
 
 
 class MacroPadListener(BaseMacroPadListener):

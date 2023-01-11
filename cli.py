@@ -1,10 +1,13 @@
 from argparse import ArgumentParser
 from watchfiles import run_process
+import os
+import sys
+from time import sleep
 
 
 def run_cli(args):
     from macropad import MacroPadRunner
-    mp = MacroPadRunner(device_path=args.device, locked=args.start_locked)
+    mp = MacroPadRunner(device_path=args.device, locked=args.start_locked, start_page_name=args.page)
     mp.initialize_actions(args.config_file)
     try:
         mp.main_loop()
@@ -37,7 +40,12 @@ run_parser.add_argument("-c", "--config-file", type=str, required=True,
                         help="Action pages path")
 run_parser.add_argument("-l", "--start-locked", action="store_true",
                         help="Start keypad software as locked. Be sure your first action page contains a PadLocker")
-
+run_parser.add_argument("-w", "--wait", action="store_true",
+                        help="Waits for the device")
+run_parser.add_argument("-p", "--page", type=str, required=True,
+                        help="Initial action page name")
+run_parser.add_argument("--no-restart", action="store_true",
+                        help="No restart")
 args = parser.parse_args()
 
 if __name__ == '__main__':
@@ -55,4 +63,13 @@ if __name__ == '__main__':
         mp.prepare_config_with_listen(args.output_file, page_count=args.page_count)
 
     elif args.subcommand == "run":
-        run_process(args.config_file, target=run_cli, args=(args,))
+        if args.wait:
+            while not os.path.exists(args.device):
+                print('.', end='')
+                sys.stdout.flush()
+                sleep(1)
+
+        if args.no_restart:
+            run_cli(args)
+        else:
+            run_process(args.config_file, target=run_cli, target_type='function', args=(args,))
