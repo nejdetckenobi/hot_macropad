@@ -7,6 +7,7 @@ from threading import Thread
 from evdev import InputDevice, categorize, ecodes
 from adapters import get_adapter
 from sys import argv, exit
+from time import sleep
 
 
 class BaseMacropadDevice(object):
@@ -16,6 +17,16 @@ class BaseMacropadDevice(object):
 
     def grab(self):
         self.device.grab()
+
+    def reconnect(self):
+        connection_error = True
+        while connection_error:
+            try:
+                print("reconnecting...")
+                self.grab()
+                connection_error = False
+            except Exception:
+                sleep(1)
 
 
 class BaseMacroPadListener(BaseMacropadDevice):
@@ -83,7 +94,10 @@ class BaseMacroPadRunner(BaseMacroPadListener):
     def main_loop(self):
         event_source = self.device.read_loop()
         while True:
-            event = next(event_source)
+            try:
+                event = next(event_source)
+            except OSError:
+                self.reconnect()   
             if event.type != ecodes.EV_KEY:
                 continue
             key = categorize(event)
