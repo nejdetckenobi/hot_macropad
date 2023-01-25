@@ -10,7 +10,10 @@ sys.path.append(os.path.abspath(__file__))
 
 def run_cli(args):
     from macropad import MacroPadRunner
-    mp = MacroPadRunner(device_path=args.device, locked=args.start_locked, start_page_name=args.page)
+    mp = MacroPadRunner(device_path=args.device,
+                        locked=args.start_locked,
+                        start_page_name=args.page,
+                        action_page_output_file=args.page_output)
     mp.initialize_actions(args.config_file)
     try:
         mp.main_loop()
@@ -49,6 +52,9 @@ run_parser.add_argument("-p", "--page", type=str, required=True,
                         help="Initial action page name")
 run_parser.add_argument("--no-restart", action="store_true",
                         help="No restart")
+run_parser.add_argument("--page-output", type=str,
+                        help="The file that contains the current action page name")
+
 args = parser.parse_args()
 
 if __name__ == '__main__':

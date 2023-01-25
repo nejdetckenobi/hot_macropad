@@ -136,4 +136,6 @@ class MacroPadConfigurer(BaseMacroPadConfigurer):
 
 
 class MacroPadRunner(BaseMacroPadRunner):
-    pass
+    def __init__(self, action_page_output_file=None, *args, **kwargs):
+        super(MacroPadRunner, self).__init__(*args, **kwargs)
+        self.context["action_page_output_file"] = action_page_output_file
