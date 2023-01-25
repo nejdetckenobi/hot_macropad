@@ -1,7 +1,7 @@
-from adapters.base import HoldExecuteAction
+from adapters.base import HoldExecuteActionMixin
 
 
-class PadLocker(HoldExecuteAction):
+class PadLocker(HoldExecuteActionMixin):
     def __init__(self, *args, **kwargs):
         super(PadLocker, self).__init__(*args, **kwargs)
         self.state = None

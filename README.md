@@ -8,6 +8,8 @@ You can put your configuration file in to your `dotfiles` repository and you're 
 Since it's under heavy-development, there's no install script at the moment. 
 Just clone the project.
 
+## How to find the path for your device file
+
 ## How to configure
 
 - First of all, you need to disable the input read for the device.
@@ -108,18 +110,18 @@ We have base classes for each key event: Press, Hold, Relase.
 | Base action class | Description |
 |-------------------|-------------|
 | `base.BaseAction` | You probably don't need this |
-| `base.PressExecuteAction` | Triggers when you press the key |
-| `base.ReleaseExecuteAction` | Triggers when you release the pressed key |
-| `base.HoldExecuteAction` | Triggers when you press and hold the key. It is triggered once per hold. |
+| `base.PressExecuteActionMixin` | Triggers when you press the key |
+| `base.ReleaseExecuteActionMixin` | Triggers when you release the pressed key |
+| `base.HoldExecuteActionMixin` | Triggers when you press and hold the key. It is triggered once per hold. |
 
 Let's create an adapter that prints `Hello, YOUR_NAME` when you release a key
 
 ```python
 # adapters/myadapter.py
-from adapters.base import ReleaseExecuteAction
+from adapters.base import ReleaseExecuteActionMixin
 
 
-class MyPrettyAdapter(ReleaseExecuteAction):
+class MyPrettyAdapter(ReleaseExecuteActionMixin):
     def __init__(self, name):  # Since we need a name to pass to the adapter
         super(MyPrettyAdapter, self).__init__()
         self.name = name

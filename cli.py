@@ -4,6 +4,9 @@ import os
 import sys
 from time import sleep
 
+print(__file__)
+sys.path.append(os.path.abspath(__file__))
+
 
 def run_cli(args):
     from macropad import MacroPadRunner

@@ -1,16 +1,12 @@
-#!/usr/bin/env python
-
 import json
 from datetime import datetime
-from threading import Thread
-
 from evdev import InputDevice, categorize, ecodes
 from adapters import get_adapter
-from sys import argv, exit
 from time import sleep
+from ipdb import launch_ipdb_on_exception
 
 
-class BaseMacropadDevice(object):
+class BaseMacroPadDevice(object):
     def __init__(self, device_path):
         self.device = InputDevice(device_path)
         self.grab()
@@ -29,7 +25,7 @@ class BaseMacropadDevice(object):
                 sleep(1)
 
 
-class BaseMacroPadListener(BaseMacropadDevice):
+class BaseMacroPadListener(BaseMacroPadDevice):
     def echo(self):
         for event in self.device.read_loop():
             if event.type == ecodes.EV_KEY:
@@ -38,7 +34,7 @@ class BaseMacroPadListener(BaseMacropadDevice):
                     print(key.keycode)
 
 
-class BaseMacropadConfigurer(BaseMacropadDevice):
+class BaseMacroPadConfigurer(BaseMacroPadDevice):
     def prepare_config_with_listen(self, file_path=None, page_count=1):
         keys = set()
         try:
@@ -88,7 +84,8 @@ class BaseMacroPadRunner(BaseMacroPadListener):
                     continue
                 adapter_file, adapter_name = adapter_data.pop('adapter').rsplit('.', 1)
                 adapter = get_adapter(adapter_file, adapter_name)
-                page[key_code] = adapter(**adapter_data)
+                with launch_ipdb_on_exception():
+                    page[key_code] = adapter(**adapter_data)
         return actions
 
     def main_loop(self):
@@ -97,7 +94,8 @@ class BaseMacroPadRunner(BaseMacroPadListener):
             try:
                 event = next(event_source)
             except OSError:
-                self.reconnect()   
+                self.reconnect()
+                continue
             if event.type != ecodes.EV_KEY:
                 continue
             key = categorize(event)
@@ -133,10 +131,9 @@ class MacroPadListener(BaseMacroPadListener):
     pass
 
 
-class MacroPadConfigurer(BaseMacropadConfigurer):
+class MacroPadConfigurer(BaseMacroPadConfigurer):
     pass
 
 
 class MacroPadRunner(BaseMacroPadRunner):
     pass
-

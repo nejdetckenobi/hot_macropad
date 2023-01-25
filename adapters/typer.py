@@ -1,11 +1,11 @@
 import pynput
 
-from adapters.base import ReleaseExecuteAction
+from adapters.base.mixins import ReleaseExecuteActionMixin, HoldExecuteActionMixin
 
 
-class Typer(ReleaseExecuteAction):
+class TyperMixin:
     def __init__(self, command):
-        super(Typer, self).__init__()
+        super(TyperMixin, self).__init__()
         self.kb_controller = pynput.keyboard.Controller()
         self.command = command
 
@@ -13,7 +13,26 @@ class Typer(ReleaseExecuteAction):
         if context["locked"]:
             return
         self.kb_controller.type(self.command)
-        super(Typer, self).run(context=context)
 
     def __repr__(self):
-        return "{}(\"{}\")".format(self.__class__.__name__, self.command.strip())
+        return "{}(\"{}\")".format(self.__class__.__name__,
+                                   self.command.strip())
+
+
+class ReleaseTyper(ReleaseExecuteActionMixin, TyperMixin):
+    def __init__(self, command):
+        TyperMixin.__init__(self, command)
+        ReleaseExecuteActionMixin.__init__(self)
+
+
+class HoldTyper(HoldExecuteActionMixin, TyperMixin):
+    def __init__(self, command, deltaseconds):
+        TyperMixin.__init__(self, command)
+        HoldExecuteActionMixin.__init__(self, deltaseconds)
+
+    def run(self, context=None):
+        TyperMixin.run(self, context=context)
+
+    def __repr__(self):
+        return "{}(\"{}\")".format(self.__class__.__name__,
+                                   self.command.strip())

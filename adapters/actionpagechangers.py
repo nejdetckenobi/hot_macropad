@@ -1,7 +1,7 @@
-from adapters.base import ReleaseExecuteAction
+from adapters.base.mixins import ReleaseExecuteActionMixin
 
 
-class ActionPageSetter(ReleaseExecuteAction):
+class ActionPageSetter(ReleaseExecuteActionMixin):
     def __init__(self, page_name):
         super(ActionPageSetter, self).__init__()
         self.page_name = page_name

@@ -1,37 +1,20 @@
-from datetime import datetime, timedelta
+from datetime import timedelta, datetime
+
+from adapters.base import BaseAction
 
 
-class BaseAction(object):
-
-    def press(self, context=None):
-        pass
-
-    def release(self, context=None):
-        pass
-
-    def hold(self, context=None):
-        pass
-
-    def run(self, context=None):
-        print(self)
-
-    def __repr__(self):
-        return "{}()".format(self.__class__.__name__)
-
-
-class PressExecuteAction(BaseAction):
+class PressExecuteActionMixin(BaseAction):
     def press(self, context=None):
         return self.run(context=context)
 
 
-class ReleaseExecuteAction(BaseAction):
+class ReleaseExecuteActionMixin(BaseAction):
     def release(self, context=None):
         return self.run(context=context)
 
 
-class HoldExecuteAction(BaseAction):
+class HoldExecuteActionMixin(BaseAction):
     def __init__(self, deltaseconds):
-        super(HoldExecuteAction, self).__init__()
         self.deltaseconds = timedelta(seconds=deltaseconds)
 
     def hold(self, context=None):
