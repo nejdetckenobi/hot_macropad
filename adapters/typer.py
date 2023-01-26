@@ -24,6 +24,9 @@ class ReleaseTyper(ReleaseExecuteActionMixin, TyperMixin):
         TyperMixin.__init__(self, command)
         ReleaseExecuteActionMixin.__init__(self)
 
+    def run(self, context=None):
+        return TyperMixin.run(self, context=context)
+
 
 class HoldTyper(HoldExecuteActionMixin, TyperMixin):
     def __init__(self, command, deltaseconds):
