@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from watchfiles import run_process
 import os
 import sys
 from time import sleep
@@ -78,7 +77,4 @@ if __name__ == '__main__':
                 sys.stdout.flush()
                 sleep(1)
 
-        if args.no_restart:
-            run_cli(args)
-        else:
-            run_process(args.config_file, target=run_cli, target_type='function', args=(args,))
+        run_cli(args)
