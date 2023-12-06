@@ -1,11 +1,12 @@
 import pynput
 
-from adapters.base.mixins import ReleaseExecuteActionMixin, HoldExecuteActionMixin
+from adapters.base.mixins import (ReleaseAction,
+                                  HoldAction)
 
 
-class TyperMixin:
+class Typer:
     def __init__(self, command):
-        super(TyperMixin, self).__init__()
+        super(Typer, self).__init__()
         self.kb_controller = pynput.keyboard.Controller()
         self.command = command
 
@@ -19,22 +20,22 @@ class TyperMixin:
                                    self.command.strip())
 
 
-class ReleaseTyper(ReleaseExecuteActionMixin, TyperMixin):
+class ReleaseTyper(ReleaseAction, Typer):
     def __init__(self, command):
-        TyperMixin.__init__(self, command)
-        ReleaseExecuteActionMixin.__init__(self)
+        Typer.__init__(self, command)
+        ReleaseAction.__init__(self)
 
     def run(self, context=None):
-        return TyperMixin.run(self, context=context)
+        return Typer.run(self, context=context)
 
 
-class HoldTyper(HoldExecuteActionMixin, TyperMixin):
+class HoldTyper(HoldAction, Typer):
     def __init__(self, command, deltaseconds):
-        TyperMixin.__init__(self, command)
-        HoldExecuteActionMixin.__init__(self, deltaseconds)
+        Typer.__init__(self, command)
+        HoldAction.__init__(self, deltaseconds)
 
     def run(self, context=None):
-        TyperMixin.run(self, context=context)
+        Typer.run(self, context=context)
 
     def __repr__(self):
         return "{}(\"{}\")".format(self.__class__.__name__,

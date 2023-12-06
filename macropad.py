@@ -4,6 +4,9 @@ from evdev import InputDevice, categorize, ecodes
 from adapters import get_adapter
 from time import sleep
 from ipdb import launch_ipdb_on_exception
+import logging
+
+logger = logging.getLogger()
 
 
 class BaseMacroPadDevice(object):
@@ -18,7 +21,7 @@ class BaseMacroPadDevice(object):
         connection_error = True
         while connection_error:
             try:
-                print("reconnecting...")
+                logger.debug("reconnecting...")
                 self.grab()
                 connection_error = False
             except Exception:
@@ -31,7 +34,7 @@ class BaseMacroPadListener(BaseMacroPadDevice):
             if event.type == ecodes.EV_KEY:
                 key = categorize(event)
                 if key.keystate == key.key_up:
-                    print(key.keycode)
+                    logger.debug(key.keycode)
 
 
 class BaseMacroPadConfigurer(BaseMacroPadDevice):
@@ -45,12 +48,13 @@ class BaseMacroPadConfigurer(BaseMacroPadDevice):
                         keys.add(key.keycode)
         except KeyboardInterrupt:
             pass
-        result = {"page{}".format(i): dict.fromkeys(sorted(keys)) for i in range(page_count)}
-        if file_path is None:
-            print("\n" + json.dumps(result, indent=4, ensure_ascii=False))
-        else:
-            with open(file_path, "w") as f:
-                json.dump(result, f, indent=4, ensure_ascii=False)
+        finally:
+            result = {"page{}".format(i): dict.fromkeys(sorted(keys), {"adapter": ""}) for i in range(page_count)}
+            if file_path is None:
+                print("\n" + json.dumps(result, indent=4, ensure_ascii=False))
+            else:
+                with open(file_path, "w") as f:
+                    json.dump(result, f, indent=4, ensure_ascii=False)
 
 
 class BaseMacroPadRunner(BaseMacroPadListener):
@@ -82,7 +86,10 @@ class BaseMacroPadRunner(BaseMacroPadListener):
             for key_code, adapter_data in page_data.items():
                 if adapter_data is None:
                     continue
-                adapter_file, adapter_name = adapter_data.pop('adapter').rsplit('.', 1)
+                try:
+                    adapter_file, adapter_name = adapter_data.pop('adapter').rsplit('.', 1)
+                except:
+                    continue
                 adapter = get_adapter(adapter_file, adapter_name)
                 with launch_ipdb_on_exception():
                     page[key_code] = adapter(**adapter_data)
@@ -107,8 +114,8 @@ class BaseMacroPadRunner(BaseMacroPadListener):
                 if self.context["locked"]:
                     pass
                 elif action is None:
-                    print("No action specified for", key.keycode,
-                          "press in action page:", self.context["action_page_name"])
+                    logger.info(f"No action specified for {key.keycode} "
+                                f"press in action page: {self.context['action_page_name']}")
                 else:
                     action.press(self.context)
             elif key.keystate == key.key_up:
@@ -118,8 +125,8 @@ class BaseMacroPadRunner(BaseMacroPadListener):
                 if self.context["locked"]:
                     pass
                 elif action is None:
-                    print("No action specified for", key.keycode,
-                          "release in action page:", self.context["action_page_name"])
+                    logger.info(f"No action specified for {key.keycode} "
+                                f"release in action page: {self.context['action_page_name']}")
                 else:
                     action.release(self.context)
             elif key.keystate == key.key_hold:

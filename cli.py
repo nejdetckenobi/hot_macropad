@@ -1,14 +1,16 @@
 from argparse import ArgumentParser
 import os
 import sys
+import logging
 from time import sleep
-
 print(__file__)
 sys.path.append(os.path.abspath(__file__))
 
 
 def run_cli(args):
-    from macropad import MacroPadRunner
+    from macropad import MacroPadRunner, logger
+    logging.basicConfig(level=getattr(logging, args.loglevel),
+                        format='%(levelname)s:%(message)s')
     mp = MacroPadRunner(device_path=args.device,
                         locked=args.start_locked,
                         start_page_name=args.page,
@@ -21,7 +23,7 @@ def run_cli(args):
 
 
 parser = ArgumentParser(description="This is the cli part of hot_macropad")
-
+parser.add_argument("--loglevel", type=str, default='INFO')
 
 subparsers = parser.add_subparsers(dest="subcommand")
 
@@ -68,7 +70,10 @@ if __name__ == '__main__':
     elif args.subcommand == "configure":
         from macropad import MacroPadConfigurer
         mp = MacroPadConfigurer(device_path=args.device)
-        mp.prepare_config_with_listen(args.output_file, page_count=args.page_count)
+        try:
+            mp.prepare_config_with_listen(args.output_file, page_count=args.page_count)
+        except TypeError:
+            pass
 
     elif args.subcommand == "run":
         if args.wait:

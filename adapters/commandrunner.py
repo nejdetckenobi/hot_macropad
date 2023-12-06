@@ -1,36 +1,32 @@
-from adapters.base.mixins import (ReleaseExecuteActionMixin,
-                                  HoldExecuteActionMixin)
+from adapters.base import BaseAction
+from adapters.base.mixins import (ReleaseAction,
+                                  HoldAction)
 
-import pynput
 import os
 
-
-class CommandRunnerMixin:
+class BaseCommandRunner(BaseAction):
     def __init__(self, command):
-        super(CommandRunnerMixin, self).__init__()
         self.command = command
 
     def run(self, context=None):
         if context["locked"]:
             return
+        super(BaseCommandRunner, self).run(context=context)
         os.system(self.command)
-        super(CommandRunnerMixin, self).run(context=context)
+
+    def __repr__(self):
+        return "{}(\"{}\")".format(self.__class__.__name__, self.command)
 
 
-class CommandRunner(ReleaseExecuteActionMixin, CommandRunnerMixin):
+class CommandRunner(ReleaseAction, BaseCommandRunner):
     def __init__(self, command):
-        CommandRunnerMixin.__init__(self, command)
-        ReleaseExecuteActionMixin.__init__(self)
-
-    def __repr__(self):
-        return "{}(\"{}\")".format(self.__class__.__name__, self.command)
+        BaseCommandRunner.__init__(self, command)
 
 
-class HoldCommandRunner(HoldExecuteActionMixin, CommandRunnerMixin):
+class HoldCommandRunner(HoldAction, BaseCommandRunner):
     def __init__(self, command, deltaseconds):
-        CommandRunnerMixin.__init__(self, command)
-        HoldExecuteActionMixin.__init__(self, deltaseconds)
+        CommandRunner.__init__(self, command)
+        HoldAction.__init__(self, deltaseconds)
 
     def __repr__(self):
         return "{}(\"{}\")".format(self.__class__.__name__, self.command)
-

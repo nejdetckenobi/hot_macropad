@@ -1,3 +1,9 @@
+import logging
+
+
+logger = logging.getLogger()
+
+
 class BaseAction(object):
 
     def press(self, context=None):
@@ -10,7 +16,7 @@ class BaseAction(object):
         pass
 
     def run(self, context=None):
-        print(self)
+        logger.info(self)
 
     def __repr__(self):
         return "{}()".format(self.__class__.__name__)

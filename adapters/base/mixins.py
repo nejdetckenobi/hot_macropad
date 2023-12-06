@@ -3,17 +3,23 @@ from datetime import timedelta, datetime
 from adapters.base import BaseAction
 
 
-class PressExecuteActionMixin(BaseAction):
+class LockableAction(BaseAction):
+    def run(self, context=None):
+        if not context["locked"]:
+            super(LockableAction, self).run(context=context)
+
+
+class PressAction(BaseAction):
     def press(self, context=None):
         return self.run(context=context)
 
 
-class ReleaseExecuteActionMixin(BaseAction):
+class ReleaseAction(BaseAction):
     def release(self, context=None):
         return self.run(context=context)
 
 
-class HoldExecuteActionMixin(BaseAction):
+class HoldAction(BaseAction):
     def __init__(self, deltaseconds):
         self.deltaseconds = timedelta(seconds=deltaseconds)
 

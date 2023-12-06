@@ -110,18 +110,18 @@ We have base classes for each key event: Press, Hold, Relase.
 | Base action class | Description |
 |-------------------|-------------|
 | `base.BaseAction` | You probably don't need this |
-| `base.PressExecuteActionMixin` | Triggers when you press the key |
-| `base.ReleaseExecuteActionMixin` | Triggers when you release the pressed key |
-| `base.HoldExecuteActionMixin` | Triggers when you press and hold the key. It is triggered once per hold. |
+| `base.PressAction` | Triggers when you press the key |
+| `base.ReleaseAction` | Triggers when you release the pressed key |
+| `base.HoldAction` | Triggers when you press and hold the key. It is triggered once per hold. |
 
 Let's create an adapter that prints `Hello, YOUR_NAME` when you release a key
 
 ```python
 # adapters/myadapter.py
-from adapters.base import ReleaseExecuteActionMixin
+from adapters.base import ReleaseAction
 
 
-class MyPrettyAdapter(ReleaseExecuteActionMixin):
+class MyPrettyAdapter(ReleaseAction):
     def __init__(self, name):  # Since we need a name to pass to the adapter
         super(MyPrettyAdapter, self).__init__()
         self.name = name
