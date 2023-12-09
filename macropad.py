@@ -114,8 +114,8 @@ class BaseMacroPadRunner(BaseMacroPadListener):
                 if self.context["locked"]:
                     pass
                 elif action is None:
-                    logger.info(f"No action specified for {key.keycode} "
-                                f"press in action page: {self.context['action_page_name']}")
+                    logger.warning(f"No action specified for {key.keycode} "
+                                   f"press in action page: {self.context['action_page_name']}")
                 else:
                     action.press(self.context)
             elif key.keystate == key.key_up:
@@ -125,8 +125,8 @@ class BaseMacroPadRunner(BaseMacroPadListener):
                 if self.context["locked"]:
                     pass
                 elif action is None:
-                    logger.info(f"No action specified for {key.keycode} "
-                                f"release in action page: {self.context['action_page_name']}")
+                    logger.warning(f"No action specified for {key.keycode} "
+                                   f"release in action page: {self.context['action_page_name']}")
                 else:
                     action.release(self.context)
             elif key.keystate == key.key_hold:

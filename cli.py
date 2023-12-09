@@ -3,7 +3,6 @@ import os
 import sys
 import logging
 from time import sleep
-print(__file__)
 sys.path.append(os.path.abspath(__file__))
 
 
