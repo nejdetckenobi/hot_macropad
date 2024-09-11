@@ -1,9 +1,9 @@
 from adapters.base.mixins import ReleaseAction
 
 
-class ActionPageSetter(ReleaseAction):
+class PageSetter(ReleaseAction):
     def __init__(self, page_name):
-        super(ActionPageSetter, self).__init__()
+        super(PageSetter, self).__init__()
         self.page_name = page_name
 
     def run(self, context=None):
@@ -12,7 +12,7 @@ class ActionPageSetter(ReleaseAction):
 
         if self.page_name in context["actions"]:
             context["action_page_name"] = self.page_name
-        super(ActionPageSetter, self).run(context=context)
+        super(PageSetter, self).run(context=context)
 
 
     def __repr__(self):

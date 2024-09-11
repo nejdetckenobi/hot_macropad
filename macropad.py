@@ -11,7 +11,8 @@ logger = logging.getLogger()
 
 class BaseMacroPadDevice(object):
     def __init__(self, device_path):
-        self.device = InputDevice(device_path)
+        self.device_path = device_path
+        self.device = InputDevice(self.device_path)
         self.grab()
 
     def grab(self):
@@ -22,6 +23,7 @@ class BaseMacroPadDevice(object):
         while connection_error:
             try:
                 logger.debug("reconnecting...")
+                self.device = InputDevice(self.device_path)
                 self.grab()
                 connection_error = False
             except Exception:
@@ -35,6 +37,7 @@ class BaseMacroPadListener(BaseMacroPadDevice):
                 key = categorize(event)
                 if key.keystate == key.key_up:
                     logger.debug(key.keycode)
+                    print(key.keycode)
 
 
 class BaseMacroPadConfigurer(BaseMacroPadDevice):
@@ -46,6 +49,7 @@ class BaseMacroPadConfigurer(BaseMacroPadDevice):
                     key = categorize(event)
                     if key.keystate == key.key_up:
                         keys.add(key.keycode)
+                        print(key.keycode)
         except KeyboardInterrupt:
             pass
         finally:

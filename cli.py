@@ -77,7 +77,6 @@ if __name__ == '__main__':
     elif args.subcommand == "run":
         if args.wait:
             while not os.path.exists(args.device):
-                print('.', end='')
                 sys.stdout.flush()
                 sleep(1)
 

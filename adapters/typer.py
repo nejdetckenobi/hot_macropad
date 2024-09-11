@@ -29,6 +29,16 @@ class ReleaseTyper(ReleaseAction, Typer):
         return Typer.run(self, context=context)
 
 
+class ReleaseFileTyper(ReleaseTyper):
+    def run(self, context=None):
+        if context["locked"]:
+            return
+        with open(self.command) as f:
+            data = f.read()
+
+        self.kb_controller.type(data)
+
+
 class HoldTyper(HoldAction, Typer):
     def __init__(self, command, deltaseconds):
         Typer.__init__(self, command)
