@@ -1,8 +1,8 @@
 from adapters.base import BaseAction
-from adapters.base.mixins import (ReleaseAction,
-                                  HoldAction)
+from adapters.base.mixins import ReleaseAction, HoldAction
 
 import os
+
 
 class BaseCommandRunner(BaseAction):
     def __init__(self, command):
@@ -15,7 +15,7 @@ class BaseCommandRunner(BaseAction):
         os.system(self.command)
 
     def __repr__(self):
-        return "{}(\"{}\")".format(self.__class__.__name__, self.command)
+        return '{}("{}")'.format(self.__class__.__name__, self.command)
 
 
 class CommandRunner(ReleaseAction, BaseCommandRunner):
@@ -29,7 +29,7 @@ class HoldCommandRunner(HoldAction, BaseCommandRunner):
         HoldAction.__init__(self, deltaseconds)
 
     def __repr__(self):
-        return "{}(\"{}\")".format(self.__class__.__name__, self.command)
+        return '{}("{}")'.format(self.__class__.__name__, self.command)
 
 
 class ToggleCommandRunner(ReleaseAction):
@@ -40,9 +40,9 @@ class ToggleCommandRunner(ReleaseAction):
 
     def __repr__(self):
         if self.state:
-            return "{}(\"{}\")".format(self.__class__.__name__, self.command1)
+            return '{}("{}")'.format(self.__class__.__name__, self.command1)
         else:
-            return "{}(\"{}\")".format(self.__class__.__name__, self.command2)
+            return '{}("{}")'.format(self.__class__.__name__, self.command2)
 
     def run(self, context=None):
         if context["locked"]:
@@ -52,4 +52,3 @@ class ToggleCommandRunner(ReleaseAction):
         os.system(command)
         super(ToggleCommandRunner, self).run(context=context)
         self.state = not self.state
-

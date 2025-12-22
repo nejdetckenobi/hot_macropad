@@ -1,0 +1,78 @@
+
+{
+    "page_changers": {
+        "KEY_A": {
+            "adapter": "page.PageSetter", "page_name": "docker"
+        },
+        "KEY_E": {
+            "adapter": "page.PageSetter", "page_name": "generic"
+        },
+        "KEY_I": {
+            "adapter": "page.PageSetter", "page_name": "fullscreen_movie"
+        },
+	"KEY_B": {
+	    "adapter": "page.PageSetter", "page_name": "launcher"
+	}
+    },
+    "pages": {
+        "generic": {
+            "KEY_1": {
+                "adapter": "commandrunner.CommandRunner", "command": "amixer -D pulse sset Master 10%-"
+            },
+            "KEY_2": {
+                "adapter": "commandrunner.CommandRunner", "command": "amixer -D pulse set Master 1+ toggle"
+            },
+            "KEY_3": {
+                "adapter": "commandrunner.CommandRunner", "command": "amixer -D pulse sset Master 10%+"
+            },
+            "KEY_D": {
+                "adapter": "commandrunner.CommandRunner", "command": "flameshot gui --raw | tesseract --psm 6 --dpi 70 stdin stdout 2>/dev/null | xclip -selection clipboard"
+            },
+            "KEY_L": {
+                "adapter": "commandrunner.CommandRunner", "command": "~/bin/caffeine-toggle"
+            }
+        },
+        "docker": {
+            "KEY_1": {
+                "adapter": "commandrunner.CommandRunner", "command": "amixer -D pulse sset Master 5%-"
+            },
+            "KEY_2": {
+                "adapter": "commandrunner.CommandRunner", "command": "amixer -D pulse set Master 1+ toggle"
+            },
+            "KEY_3": {
+                "adapter": "commandrunner.CommandRunner", "command": "amixer -D pulse sset Master 5%+"
+            },
+            "KEY_D": {
+                "adapter": "typer.ReleaseTyper", "command": "docker compose down\n"
+            },
+            "KEY_H": {
+                "adapter": "typer.ReleaseTyper", "command": "docker compose build --no-cache\n"
+            },
+            "KEY_L": {
+                "adapter": "typer.ReleaseTyper", "command": "docker compose up -d --build\n"
+            }
+        },
+        "fullscreen_movie": {
+            "KEY_1": {
+                "adapter": "commandrunner.CommandRunner", "command": "xdotool key Down"
+            },
+            "KEY_3": {
+                "adapter": "commandrunner.CommandRunner", "command": "xdotool key Up"
+            },
+	    "KEY_2": {
+		"adapter": "commandrunner.CommandRunner", "command": "xdotool key m"
+            },
+            "KEY_4": {
+                "adapter": "commandrunner.CommandRunner", "command": "xdotool key Left"
+            },
+            "KEY_6": {
+                "adapter": "commandrunner.CommandRunner", "command": "xdotool key Right"
+            }
+        },
+	"launcher": {
+	    "KEY_C": {
+                "adapter": "commandrunner.CommandRunner", "command": "/opt/google/chrome/google-chrome --profile-directory=Default --app-id=hnpfjngllnobngcgfapefoaidbinmjnm"
+	    }
+        }
+    }
+}

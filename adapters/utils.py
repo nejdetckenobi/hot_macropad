@@ -7,11 +7,7 @@ from time import sleep
 
 class AutoClicker(ReleaseAction):
 
-    BUTTON_MAPPER = {"left": Button.left,
-                     "right": Button.right,
-                     "middle": Button.middle}
-
-    def __init__(self, button='left', interval=0.03):
+    def __init__(self, button="left", interval=0.03):
         ReleaseAction.__init__(self)
         self.stop_event = Event()
         self.interval = interval
@@ -21,17 +17,17 @@ class AutoClicker(ReleaseAction):
 
     @property
     def button(self):
-        return self.BUTTON_MAPPER[self.button_name]
+        return getattr(Button, self.button_name)
 
     def __repr__(self):
-        return "{}(\"{}\")".format(self.__class__.__name__, self.button_name)
+        return '{}("{}")'.format(self.__class__.__name__, self.button_name)
 
     def _clicker(self):
         while not self.stop_event.is_set():
             self.mouse_controler.click(self.button)
             sleep(self.interval)
 
-    def run(self, context=None):
+    def run(self, context: dict | None = None):
         state = context.get("autoclick_active", False)
         if not state:
             self.stop_event = Event()

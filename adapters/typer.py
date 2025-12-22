@@ -1,7 +1,6 @@
 import pynput
 
-from adapters.base.mixins import (ReleaseAction,
-                                  HoldAction)
+from adapters.base.mixins import ReleaseAction, HoldAction
 
 
 class Typer:
@@ -16,8 +15,7 @@ class Typer:
         self.kb_controller.type(self.command)
 
     def __repr__(self):
-        return "{}(\"{}\")".format(self.__class__.__name__,
-                                   self.command.strip())
+        return '{}("{}")'.format(self.__class__.__name__, self.command.strip())
 
 
 class ReleaseTyper(ReleaseAction, Typer):
@@ -48,5 +46,4 @@ class HoldTyper(HoldAction, Typer):
         Typer.run(self, context=context)
 
     def __repr__(self):
-        return "{}(\"{}\")".format(self.__class__.__name__,
-                                   self.command.strip())
+        return '{}("{}")'.format(self.__class__.__name__, self.command.strip())

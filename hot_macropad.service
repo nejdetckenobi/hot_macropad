@@ -1,0 +1,14 @@
+[Unit]
+Description=Hot Macropad Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/nejdetckenobi/Projects/hot_macropad/start.sh
+Restart=always
+User=nejdetckenobi
+Environment=DISPLAY=:1
+Environment=XDG_RUNTIME_DIR=/run/user/1001
+
+[Install]
+WantedBy=default.target

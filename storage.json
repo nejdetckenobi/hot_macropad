@@ -1,0 +1,15 @@
+{
+    "me": {
+        "id": "24536067306",
+        "fullname": "Nejdet Çağdaş Yücesoy",
+	"phone": "+905531470093",
+        "address": "İçerenköy Mahallesi, Döndü Sokak, Güneş Apartmanı, No: 11, Daire: 10, Ataşehir, İSTANBUL"
+    },
+    "work": {
+        "address": "19 Mayıs Mahallesi, Bayar Caddesi, Or-Men Sitesi, Çamlıca F Girişi, No: 65G, İç Kapı No: 155, Kadıköy, İSTANBUL",
+    	"tax": {
+    	    "id": "6311911884",
+    	    "office": "Erenköy"
+    	}
+    }
+}

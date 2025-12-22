@@ -1,3 +1,4 @@
+from copy import deepcopy
 import json
 from datetime import datetime
 from evdev import InputDevice, categorize, ecodes
@@ -53,7 +54,10 @@ class BaseMacroPadConfigurer(BaseMacroPadDevice):
         except KeyboardInterrupt:
             pass
         finally:
-            result = {"page{}".format(i): dict.fromkeys(sorted(keys), {"adapter": ""}) for i in range(page_count)}
+            result = {
+                "page{}".format(i): dict.fromkeys(sorted(keys), {"adapter": ""})
+                for i in range(page_count)
+            }
             if file_path is None:
                 print("\n" + json.dumps(result, indent=4, ensure_ascii=False))
             else:
@@ -84,14 +88,22 @@ class BaseMacroPadRunner(BaseMacroPadListener):
         with open(file_path) as f:
             data = json.load(f)
 
-        for page_name, page_data in data.items():
+        page_changers = data["page_changers"]
+        pages = data["pages"]
+        for page_name, page_data in pages.items():
+            print(f'loading "{page_name}"...')
+            page_data = {**page_data, **deepcopy(page_changers)}
             page = {}
             actions[page_name] = page
             for key_code, adapter_data in page_data.items():
                 if adapter_data is None:
                     continue
+                with launch_ipdb_on_exception():
+                    print(f'key: {key_code}, adapter: {adapter_data["adapter"]}')
                 try:
-                    adapter_file, adapter_name = adapter_data.pop('adapter').rsplit('.', 1)
+                    adapter_file, adapter_name = adapter_data.pop("adapter").rsplit(
+                        ".", 1
+                    )
                 except:
                     continue
                 adapter = get_adapter(adapter_file, adapter_name)
@@ -111,15 +123,19 @@ class BaseMacroPadRunner(BaseMacroPadListener):
                 continue
             key = categorize(event)
 
-            action = self.actions.get(self.context["action_page_name"], {}).get(key.keycode)
+            action = self.actions.get(self.context["action_page_name"], {}).get(
+                key.keycode
+            )
             if key.keystate == key.key_down:
                 self.context["hold_start"] = datetime.now()
 
                 if self.context["locked"]:
                     pass
                 elif action is None:
-                    logger.warning(f"No action specified for {key.keycode} "
-                                   f"press in action page: {self.context['action_page_name']}")
+                    logger.warning(
+                        f"No action specified for {key.keycode} "
+                        f"press in action page: {self.context['action_page_name']}"
+                    )
                 else:
                     action.press(self.context)
             elif key.keystate == key.key_up:
@@ -129,8 +145,10 @@ class BaseMacroPadRunner(BaseMacroPadListener):
                 if self.context["locked"]:
                     pass
                 elif action is None:
-                    logger.warning(f"No action specified for {key.keycode} "
-                                   f"release in action page: {self.context['action_page_name']}")
+                    logger.warning(
+                        f"No action specified for {key.keycode} "
+                        f"release in action page: {self.context['action_page_name']}"
+                    )
                 else:
                     action.release(self.context)
             elif key.keystate == key.key_hold:
