@@ -1,117 +1,114 @@
 # Hot Macropad
 
-Hot Macropad is a Linux utility for managing custom macro pads. It allows users to bind scripts to keys and switch between multiple pages of macros. The tool captures key events from your macropad exclusively and executes scripts in response, without sending keypresses to the system.
+Hot Macropad is a user-level macropad daemon for Linux. It allows you to assign scripts to keys to perform macros and switch pages.
 
-## Features
+---
 
-* Exclusive capture of macropad keys using `evdev`.
-* Script-driven macros on key release.
-* Multiple pages/layers of macros.
-* Page switching controlled via script output (`PAGE=<name>`).
-* Configurable per-user setup using `~/.config/hot_macropad`.
-* Fully foreground execution; macro scripts block until completion.
-* Compatible with multiple macropads on the same system.
+## 1. Installation
 
-## Installation
+### Requirements
 
-1. Clone or copy the repository.
-2. Copy the main script to a bin directory in your PATH:
+* Bash
+* evtest
+* xdotool (optional, for macros)
 
-   ```bash
-   mkdir -p ~/bin
-   cp hot-macropad.sh ~/bin/hot-macropad
-   chmod +x ~/bin/hot-macropad
-   ```
-3. Create the configuration directory:
+### Installation Steps
 
-   ```bash
-   mkdir -p ~/.config/hot_macropad/default
-   ```
-4. Add macro scripts to `~/.config/hot_macropad/default/` or other pages.
-
-   * Scripts must be executable (`chmod +x script.sh`).
-   * Script names should match key names (`KEY_A.sh`, `KEY_B.sh`, etc.).
-
-## Usage
+1. Copy the script to a directory in your PATH and make it executable:
 
 ```bash
-# Run with default page
-hot-macropad /dev/input/eventX
-
-# Run with a specific starting page
-hot-macropad /dev/input/eventX page1
+mkdir -p ~/bin
+cp hot-macropad.sh ~/bin/hot-macropad
+chmod +x ~/bin/hot-macropad
 ```
 
-### Macro Scripts
+2. Create the config directory and add example scripts:
 
-* Scripts are executed **on key release**.
-* Output can include page change commands:
+```bash
+mkdir -p ~/.config/hot_macropad/default
+# Example script
+echo -e "#!/usr/bin/env bash\necho 'KEY_A pressed'" > ~/.config/hot_macropad/default/KEY_A.sh
+chmod +x ~/.config/hot_macropad/default/KEY_A.sh
+```
 
-  ```bash
-  PAGE=page1
-  ```
-* Example script (`KEY_A.sh`):
+3. Add your user to the `input` group (no sudo required when running after this):
 
-  ```bash
-  #!/usr/bin/env bash
-  notify-send 'Key A pressed'
-  PAGE=page1
-  ```
+```bash
+sudo usermod -aG input $USER
+# To apply without logout:
+newgrp input
+```
 
-## Configuration Directory Structure
+4. Install the user service for systemd:
+
+```bash
+mkdir -p ~/.config/systemd/user
+cp hot-macropad.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable hot-macropad.service
+systemctl --user start hot-macropad.service
+```
+
+> Note: Adjust the device path in `ExecStart` of `hot-macropad.service` to match your macropad.
+
+---
+
+## 2. Usage
+
+### Startup
+
+* Default page: `default`
+* To start with a different page:
+
+```bash
+~/bin/hot-macropad /dev/input/eventX page1
+```
+
+### Script Structure
+
+* One script per key (`KEY_A.sh`, `KEY_B.sh`, etc.)
+* Executed on key release
+* Script stdout and stderr are printed to terminal
+* To request a page switch from a script, output a single line:
+
+```bash
+PAGE=page1
+```
+
+* Config directory structure:
 
 ```
 ~/.config/hot_macropad/
  ├─ default/
  │   ├─ KEY_A.sh
- │   ├─ KEY_B.sh
+ │   └─ ...
  ├─ page1/
- │   └─ KEY_A.sh
  └─ page2/
-     └─ KEY_A.sh
 ```
 
-* Each directory represents a page/layer.
-* Scripts should be named after the key codes they correspond to.
+### Example Script
 
-## Systemd User Service
+`~/.config/hot_macropad/default/KEY_F13.sh`:
 
-To run Hot Macropad automatically on login:
+```bash
+#!/usr/bin/env bash
+# This script switches to page1
+echo "PAGE=page1"
+```
 
-1. Copy the unit file:
+---
 
-   ```bash
-   mkdir -p ~/.config/systemd/user
-   cp hot-macropad.service ~/.config/systemd/user/
-   ```
-2. Reload user units and enable the service:
+## 3. Viewing Logs
 
-   ```bash
-   systemctl --user daemon-reload
-   systemctl --user enable hot-macropad.service
-   systemctl --user start hot-macropad.service
-   ```
-3. Check logs:
+To view user service logs:
 
-   ```bash
-   journalctl --user -u hot-macropad.service -f
-   ```
+```bash
+journalctl --user -u hot-macropad.service -f
+```
 
-## Requirements
+Script outputs and page switch messages appear here.
 
-* `bash`
-* `evtest`
-* `xdotool` (optional, if used in macros)
-* Linux with evdev support
+---
 
-## Notes
-
-* Hot Macropad **does not send key events to the system**. Grabbed keys are exclusive to the script.
-* Multiple macropads are supported; run a separate instance for each device.
-* The default page is `default`. You can specify a different starting page as the second argument.
-* Scripts should be executable and produce optional output for page switching.
-
-## License
-
-MIT License
+With this setup, you can use multiple macropads, assign scripts to each key, and run the daemon at the user level without needing sudo.
 
