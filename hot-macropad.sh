@@ -6,7 +6,7 @@
 set -euo pipefail
 
 if [[ $# -lt 1 || $# -gt 2 ]]; then
-    echo "Usage: $0 /dev/input/eventX [default_page]" >&2
+    echo "Usage: $0 /dev/input/eventX [default_page]"
     exit 1
 fi
 
@@ -17,19 +17,30 @@ CONFIG_DIR="$CONFIG_BASE/hot_macropad"
 CURRENT_PAGE="$DEFAULT_PAGE"
 
 if [[ ! -e "$DEVICE" ]]; then
-    echo "Device not found: $DEVICE" >&2
+    echo "Device not found: $DEVICE"
     exit 1
 fi
 
 if [[ ! -d "$CONFIG_DIR/$CURRENT_PAGE" ]]; then
-    echo "Initial page not found: $CONFIG_DIR/$CURRENT_PAGE" >&2
+    echo "Initial page not found: $CONFIG_DIR/$CURRENT_PAGE"
     exit 1
 fi
 
 if ! command -v evtest >/dev/null 2>&1; then
-    echo "evtest is required but not installed" >&2
+    echo "evtest is required but not installed"
     exit 1
 fi
+
+# Check scripts in the current page and warn if missing or not executable
+shopt -s nullglob
+scripts=($CONFIG_DIR/$CURRENT_PAGE/*.sh)
+if [[ ${#scripts[@]} -eq 0 ]]; then
+    echo "[WARN] No scripts found in page $CURRENT_PAGE"
+fi
+
+for script in "${scripts[@]}"; do
+    [[ ! -x "$script" ]] && echo "[WARN] $script is not executable"
+done
 
 # Apply page change if script requests it
 apply_page_change() {
@@ -42,16 +53,14 @@ apply_page_change() {
             CURRENT_PAGE="$new_page"
             echo "[PAGE] switched to $CURRENT_PAGE"
         else
-            echo "[PAGE] requested page not found: $new_page" >&2
+            echo "[PAGE] requested page not found: $new_page"
         fi
     fi
 }
 
 # evtest output is parsed to extract key name and value
-# Example line:
-# Event: time 1700000000.123456, type 1 (EV_KEY), code 30 (KEY_A), value 1
-
-evtest --grab "$DEVICE" | while read -r line; do
+# Use stdbuf for line-buffered output so logs appear immediately
+while read -r line; do
     [[ "$line" != *"EV_KEY"* ]] && continue
 
     key=$(echo "$line" | sed -n 's/.*code \([0-9]*\) (\(KEY_[A-Z0-9_]*\)).*/\2/p')
@@ -64,10 +73,13 @@ evtest --grab "$DEVICE" | while read -r line; do
             # RELEASE
             script="$CONFIG_DIR/$CURRENT_PAGE/$key.sh"
 
-            if [[ -x "$script" ]]; then
+            if [[ ! -e "$script" ]]; then
+                echo "[WARN] $CURRENT_PAGE/$key script not found"
+            elif [[ ! -x "$script" ]]; then
+                echo "[WARN] $CURRENT_PAGE/$key script exists but is not executable"
+            else
                 echo "[RUN] $CURRENT_PAGE/$key"
 
-                # Capture script output for page switch commands
                 output=$("$script" 2>&1)
                 echo "$output"
 
@@ -76,5 +88,4 @@ evtest --grab "$DEVICE" | while read -r line; do
             ;;
     esac
 
-done
-
+done < <(stdbuf -oL evtest --grab "$DEVICE")
