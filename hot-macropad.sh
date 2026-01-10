@@ -13,7 +13,9 @@ fi
 DEVICE="$1"
 DEFAULT_PAGE="${2:-default}"
 CONFIG_BASE="${XDG_CONFIG_HOME:-$HOME/.config}"
-CONFIG_DIR="$CONFIG_BASE/hot_macropad"
+# Optional config directory override (3rd argument)
+CONFIG_DIR_OVERRIDE="${3:-}"
+CONFIG_DIR="${CONFIG_DIR_OVERRIDE:-$CONFIG_BASE/hot_macropad}"
 CURRENT_PAGE="$DEFAULT_PAGE"
 
 if [[ ! -e "$DEVICE" ]]; then

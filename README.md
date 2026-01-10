@@ -49,7 +49,7 @@ systemctl --user enable hot-macropad.service
 systemctl --user start hot-macropad.service
 ```
 
-> Note: Adjust the device path in `ExecStart` of `hot-macropad.service` to match your macropad.
+> Note: Adjust the device path and optional config directory in `ExecStart` of `hot-macropad.service` to match your macropad setup.
 
 ---
 
@@ -58,17 +58,39 @@ systemctl --user start hot-macropad.service
 ### Startup
 
 * Default page: `default`
-* To start with a different page:
+* Default config directory:
+  ```
+  $XDG_CONFIG_HOME/hot_macropad
+  ```
+
+* Basic usage:
 
 ```bash
-~/bin/hot-macropad /dev/input/eventX page1
+hot-macropad /dev/input/eventX
 ```
+
+* Start with a different page:
+
+```bash
+hot-macropad /dev/input/eventX page1
+```
+
+* Override config directory (useful for multiple macropads):
+
+```bash
+hot-macropad /dev/input/eventX default ~/.config/hot_macropad_left
+hot-macropad /dev/input/eventY default ~/.config/hot_macropad_right
+```
+
+This allows running multiple instances with independent configurations.
+
+---
 
 ### Script Structure
 
 * One script per key (`KEY_A.sh`, `KEY_B.sh`, etc.)
 * Executed on key release
-* Script stdout and stderr are printed to terminal
+* Script stdout and stderr are logged
 * To request a page switch from a script, output a single line:
 
 ```bash
@@ -78,13 +100,15 @@ PAGE=page1
 * Config directory structure:
 
 ```
-~/.config/hot_macropad/
+hot_macropad/
  ├─ default/
  │   ├─ KEY_A.sh
  │   └─ ...
  ├─ page1/
  └─ page2/
 ```
+
+---
 
 ### Example Script
 
@@ -106,9 +130,14 @@ To view user service logs:
 journalctl --user -u hot-macropad.service -f
 ```
 
-Script outputs and page switch messages appear here.
+Script outputs, warnings, and page switch messages appear here.
 
 ---
 
-With this setup, you can use multiple macropads, assign scripts to each key, and run the daemon at the user level without needing sudo.
+With this setup, you can:
 
+* Run the daemon without sudo
+* Use multiple macropads simultaneously
+* Assign per-key scripts
+* Switch pages dynamically
+* Override config paths per device when needed
