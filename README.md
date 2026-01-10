@@ -30,11 +30,11 @@ REQUIREMENTS
 INSTALLATION
 
 1. Install the script
-
+```
     mkdir -p ~/bin
     cp hot-macropad.sh ~/bin/hot-macropad
     chmod +x ~/bin/hot-macropad
-
+```
 Ensure ~/bin is in your PATH.
 
 ------------------------------------------------------------
@@ -42,46 +42,46 @@ Ensure ~/bin is in your PATH.
 2. Permissions
 
 Add your user to the input group to access /dev/input/event* devices:
-
+```
     sudo usermod -aG input $USER
     newgrp input
-
+```
 ------------------------------------------------------------
 
 3. Configuration directory
 
 Default config directory:
-
+```
     $XDG_CONFIG_HOME/hot_macropad
-
+```
 Create initial setup:
-
+```
     mkdir -p ~/.config/hot_macropad/default
-
+```
 Example key script:
-
+```
     cat > ~/.config/hot_macropad/default/KEY_A.sh << 'EOF'
     #!/usr/bin/env bash
     echo "KEY_A released"
     EOF
 
     chmod +x ~/.config/hot_macropad/default/KEY_A.sh
-
+```
 ------------------------------------------------------------
 
 USAGE
 
 Command-line usage:
-
+```
     hot-macropad <device> [default_page] [config_dir]
-
+```
 Examples:
-
+```
     hot-macropad /dev/input/event10
     hot-macropad /dev/input/event10 page1
     hot-macropad /dev/input/event10 default ~/.config/hot_macropad_left
     hot-macropad /dev/input/event11 default ~/.config/hot_macropad_right
-
+```
 ------------------------------------------------------------
 
 SCRIPT BEHAVIOR
@@ -96,20 +96,20 @@ SCRIPT BEHAVIOR
 PAGE SWITCHING
 
 A script may request a page switch by printing:
-
+```
     PAGE=page_name
-
+```
 Example:
-
+```
     #!/usr/bin/env bash
     echo "PAGE=page1"
-
+```
 If the page exists, Hot Macropad switches immediately.
 
 ------------------------------------------------------------
 
 CONFIGURATION LAYOUT
-
+```
     hot_macropad/
      ├─ default/
      │   ├─ KEY_A.sh
@@ -117,7 +117,7 @@ CONFIGURATION LAYOUT
      ├─ page1/
      │   └─ KEY_A.sh
      └─ page2/
-
+```
 ------------------------------------------------------------
 
 SYSTEMD (USER SERVICE)
@@ -125,16 +125,16 @@ SYSTEMD (USER SERVICE)
 A systemd template unit is provided.
 
 Install the unit:
-
+```
     mkdir -p ~/.config/systemd/user
     cp systemd/hot-macropad@.service ~/.config/systemd/user/
     systemctl --user daemon-reload
-
+```
 Enable for a device:
-
+```
     systemctl --user enable hot-macropad@event10.service
     systemctl --user start hot-macropad@event10.service
-
+```
 In the template unit, %i refers to the device name under /dev/input
 (e.g. event10 -> /dev/input/event10)
 
@@ -143,9 +143,9 @@ In the template unit, %i refers to the device name under /dev/input
 LOGS
 
 View logs with:
-
+```
     journalctl --user -u hot-macropad@event10.service -f
-
+```
 All script output, warnings, and page switch messages appear here.
 
 ------------------------------------------------------------
