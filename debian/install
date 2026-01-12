@@ -1,3 +1,3 @@
-hot-macropad.sh      usr/bin/hot-macropad
+hot-macropad      usr/bin/hot-macropad
 hot-macropad@.service usr/lib/systemd/user/
 README.md            usr/share/doc/hot-macropad/
