@@ -175,3 +175,8 @@ systemctl --user start  hot-macropad@my-device.service
 
 > Note: `eventX` numbers may change between reboots.
 > This method should only be used if `by-id` is unavailable.
+
+
+## Versioning
+Git tags and Debian package versions are identical.
+Every released .deb corresponds to a Git tag with the exact same version string.
