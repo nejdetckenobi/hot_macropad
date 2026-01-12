@@ -1,168 +1,177 @@
 # Hot Macropad
 
-Hot Macropad is a minimal, script-driven macropad daemon for Linux built on top of evtest.
-It allows mapping keys to executable scripts and switching between pages dynamically.
+Hot Macropad is a user-level macropad daemon for Linux.
+It listens to input events from a macropad device and executes user-defined scripts per key, with optional page switching.
 
-The project intentionally avoids abstractions, configuration formats, or frameworks.
-What runs is always visible as shell scripts.
+---
 
-------------------------------------------------------------
+## Installation
 
-FEATURES
+### Install via Deb Package
 
-- evdev-level input handling via evtest --grab
-- One script per key
-- Page-based configuration
-- Script-driven page switching
-- Multiple macropads supported via systemd template units
-- User-level service (no sudo at runtime)
+Install the downloaded `.deb` package:
 
-------------------------------------------------------------
-
-REQUIREMENTS
-
-- Bash (>= 4)
-- evtest
-- xdotool (optional, for macros)
-
-------------------------------------------------------------
-
-INSTALLATION
-
-1. Install the script
 ```
-    mkdir -p ~/bin
-    cp hot-macropad.sh ~/bin/hot-macropad
-    chmod +x ~/bin/hot-macropad
+sudo dpkg -i hot-macropad_0.1.0-1_amd64.deb
 ```
-Ensure ~/bin is in your PATH.
 
-------------------------------------------------------------
+If dependency errors occur:
 
-2. Permissions
-
-Add your user to the input group to access /dev/input/event* devices:
 ```
-    sudo usermod -aG input $USER
-    newgrp input
+sudo apt -f install
 ```
-------------------------------------------------------------
 
-3. Configuration directory
+This will:
+
+* Install the `hot-macropad` script to `/usr/bin/hot-macropad`
+* Install the systemd **user** unit template
+
+---
+
+### Manual Installation (from Source)
+
+Clone the repository:
+
+```
+git clone https://github.com/nejdetckenobi/hot_macropad.git
+cd hot_macropad
+```
+
+Install the script into your PATH:
+
+```
+mkdir -p ~/bin
+cp hot-macropad.sh ~/bin/hot-macropad
+chmod +x ~/bin/hot-macropad
+```
+
+Install the systemd user unit file:
+
+```
+mkdir -p ~/.config/systemd/user
+cp hot-macropad@.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+```
+
+---
+
+## Config Directory Structure
 
 Default config directory:
+
 ```
-    $XDG_CONFIG_HOME/hot_macropad
+~/.config/hot_macropad/
 ```
-Create initial setup:
+
+Example layout:
+
 ```
-    mkdir -p ~/.config/hot_macropad/default
+~/.config/hot_macropad/
+ ├─ default/
+ │   ├─ KEY_A.sh
+ │   ├─ KEY_B.sh
+ │   └─ KEY_F13.sh
+ ├─ page1/
+ └─ page2/
 ```
-Example key script:
+
+Create the default page:
+
 ```
-    cat > ~/.config/hot_macropad/default/KEY_A.sh << 'EOF'
-    #!/usr/bin/env bash
-    echo "KEY_A released"
-    EOF
-
-    chmod +x ~/.config/hot_macropad/default/KEY_A.sh
+mkdir -p ~/.config/hot_macropad/default
 ```
-------------------------------------------------------------
 
-USAGE
+Rules:
 
-Command-line usage:
+* One script per key
+* Script name must match the key code (e.g. `KEY_A.sh`)
+* Scripts must be executable
+
+---
+
+## systemd Usage After Installation
+
+### Recommended Method (by-id)
+
+List available input devices:
+
 ```
-    hot-macropad <device> [default_page] [config_dir]
+ls /dev/input/by-id/
 ```
-Examples:
+
+Example device name:
+
 ```
-    hot-macropad /dev/input/event10
-    hot-macropad /dev/input/event10 page1
-    hot-macropad /dev/input/event10 default ~/.config/hot_macropad_left
-    hot-macropad /dev/input/event11 default ~/.config/hot_macropad_right
+usb-MYINPUTDEVICE-event-kbd
 ```
-------------------------------------------------------------
 
-SCRIPT BEHAVIOR
+Enable and start the service:
 
-- One script per key (KEY_A.sh, KEY_B.sh, ...)
-- Scripts are executed on key release
-- Script stdout and stderr are logged
-- Missing or non-executable scripts are logged as warnings
-
-------------------------------------------------------------
-
-PAGE SWITCHING
-
-A script may request a page switch by printing:
 ```
-    PAGE=page_name
+systemctl --user enable hot-macropad@usb-MYINPUTDEVICE-event-kbd.service
+systemctl --user start  hot-macropad@usb-MYINPUTDEVICE-event-kbd.service
 ```
-Example:
+
+View logs:
+
 ```
-    #!/usr/bin/env bash
-    echo "PAGE=page1"
+journalctl --user -u hot-macropad@usb-MYINPUTDEVICE-event-kbd.service -f
 ```
-If the page exists, Hot Macropad switches immediately.
 
-------------------------------------------------------------
+---
 
-CONFIGURATION LAYOUT
+## Writing a Key Script (Example)
+
+Example: show a desktop notification when `KEY_A` is released.
+
+File:
+
 ```
-    hot_macropad/
-     ├─ default/
-     │   ├─ KEY_A.sh
-     │   ├─ KEY_B.sh
-     ├─ page1/
-     │   └─ KEY_A.sh
-     └─ page2/
+~/.config/hot_macropad/default/KEY_A.sh
 ```
-------------------------------------------------------------
 
-SYSTEMD (USER SERVICE)
+Contents:
 
-A systemd template unit is provided.
-
-Install the unit:
 ```
-    mkdir -p ~/.config/systemd/user
-    cp systemd/hot-macropad@.service ~/.config/systemd/user/
-    systemctl --user daemon-reload
+#!/usr/bin/env bash
+notify-send "Hot Macropad" "KEY_A pressed"
 ```
-Enable for a device:
+
+Make it executable:
+
 ```
-    systemctl --user enable hot-macropad@event10.service
-    systemctl --user start hot-macropad@event10.service
+chmod +x ~/.config/hot_macropad/default/KEY_A.sh
 ```
-In the template unit, %i refers to the device name under /dev/input
-(e.g. event10 -> /dev/input/event10)
 
-------------------------------------------------------------
+---
 
-LOGS
+## eventX Fallback
 
-View logs with:
+Some devices may not appear under `/dev/input/by-id/`
+(common with certain Bluetooth or virtual devices).
+
+In this case, override the systemd unit.
+
+### Create an Override
+
 ```
-    journalctl --user -u hot-macropad@event10.service -f
+systemctl --user edit hot-macropad@my-device.service
 ```
-All script output, warnings, and page switch messages appear here.
 
-------------------------------------------------------------
+Add:
 
-DESIGN PHILOSOPHY
+```
+[Service]
+ExecStart=
+ExecStart=/usr/bin/hot-macropad /dev/input/event12
+```
 
-- No configuration formats (JSON/YAML/TOML)
-- No hidden state
-- No magic device detection
-- Scripts are the API
-- Errors are visible and verbose
+Then enable and start:
 
-If something runs, you can open it and read it.
+```
+systemctl --user enable hot-macropad@my-device.service
+systemctl --user start  hot-macropad@my-device.service
+```
 
-------------------------------------------------------------
-
-LICENSE
-
-MIT License
-
+> Note: `eventX` numbers may change between reboots.
+> This method should only be used if `by-id` is unavailable.

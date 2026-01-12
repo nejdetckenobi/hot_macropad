@@ -1,0 +1,19 @@
+Source: hot-macropad
+Section: utils
+Priority: optional
+Maintainer: Nejdet Çağdaş Yücesoy <nejdetyucesoy@gmail.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+
+Package: hot-macropad
+Architecture: all
+Depends: bash, evtest
+Recommends: xdotool
+Description: Script-driven macropad daemon using evdev
+ Hot Macropad is a user-level daemon that binds Linux input devices
+ to executable scripts. Each key can trigger a shell script and
+ scripts may request page switches at runtime.
+ .
+ This package installs a systemd user service template. Users must
+ explicitly enable and configure instances for their devices.
