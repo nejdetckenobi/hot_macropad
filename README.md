@@ -145,14 +145,77 @@ chmod +x ~/.config/hot_macropad/default/KEY_A.sh
 
 ---
 
-## eventX Fallback
+## Devices Without a by-id Entry
 
 Some devices may not appear under `/dev/input/by-id/`
 (common with certain Bluetooth or virtual devices).
 
-In this case, override the systemd unit.
+Because `eventX` numbers may change between reboots, create a persistent
+device alias with a udev rule instead of relying on a specific `eventX` path.
 
-### Create an Override
+### Create a Persistent udev Alias
+
+First, identify the current event device and inspect its attributes:
+
+```
+udevadm info --attribute-walk --name=/dev/input/event12
+```
+
+Find attributes that uniquely identify the device, such as `idVendor` and
+`idProduct`. Then create `/etc/udev/rules.d/99-hot-macropad.rules`:
+
+```udev
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="1234", ATTRS{idProduct}=="5678", ENV{ID_INPUT_KEYBOARD}=="1", SYMLINK+="input/hot-macropad"
+```
+
+Replace `1234` and `5678` with the values reported for your device. If more
+than one connected device has the same vendor and product IDs, add a serial
+number to distinguish it:
+
+```udev
+ATTRS{serial}=="DEVICE_SERIAL_NUMBER"
+```
+
+Reload the rules and reconnect the device:
+
+```
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+Verify that the alias exists:
+
+```
+ls -l /dev/input/hot-macropad
+```
+
+### Use the Alias in the Service
+
+Override the systemd unit:
+
+```
+systemctl --user edit hot-macropad@my-device.service
+```
+
+Add:
+
+```ini
+[Service]
+ExecStart=
+ExecStart=/usr/bin/hot-macropad /dev/input/hot-macropad
+```
+
+Then enable and start the service:
+
+```
+systemctl --user enable hot-macropad@my-device.service
+systemctl --user start  hot-macropad@my-device.service
+```
+
+### Direct eventX Fallback
+
+For temporary use or troubleshooting, the service can point directly to an
+event device:
 
 ```
 systemctl --user edit hot-macropad@my-device.service
@@ -166,15 +229,8 @@ ExecStart=
 ExecStart=/usr/bin/hot-macropad /dev/input/event12
 ```
 
-Then enable and start:
-
-```
-systemctl --user enable hot-macropad@my-device.service
-systemctl --user start  hot-macropad@my-device.service
-```
-
 > Note: `eventX` numbers may change between reboots.
-> This method should only be used if `by-id` is unavailable.
+> Prefer `/dev/input/by-id/` or a persistent udev alias for normal use.
 
 
 ## Versioning
