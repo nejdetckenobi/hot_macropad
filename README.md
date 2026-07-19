@@ -12,7 +12,7 @@ It listens to input events from a macropad device and executes user-defined scri
 Install the downloaded `.deb` package:
 
 ```
-sudo dpkg -i hot-macropad_0.1.0-1_amd64.deb
+sudo dpkg -i hot-macropad_0.2.0_all.deb
 ```
 
 If dependency errors occur:
@@ -105,7 +105,8 @@ Example device name:
 usb-MYINPUTDEVICE-event-kbd
 ```
 
-Enable and start the service:
+Enable and start the service (the plain instance name is retained for
+compatibility with `/dev/input/by-id/` entries):
 
 ```
 systemctl --user enable hot-macropad@usb-MYINPUTDEVICE-event-kbd.service
@@ -150,8 +151,9 @@ chmod +x ~/.config/hot_macropad/default/KEY_A.sh
 Some devices may not appear under `/dev/input/by-id/`
 (common with certain Bluetooth or virtual devices).
 
-Because `eventX` numbers may change between reboots, create a persistent
-device alias with a udev rule instead of relying on a specific `eventX` path.
+Because `eventX` numbers may change between reboots, create a persistent,
+uniquely named device alias with a udev rule instead of relying on a specific
+`eventX` path. Use a different alias for every macropad.
 
 ### Create a Persistent udev Alias
 
@@ -162,19 +164,23 @@ udevadm info --attribute-walk --name=/dev/input/event12
 ```
 
 Find attributes that uniquely identify the device, such as `idVendor` and
-`idProduct`. Then create `/etc/udev/rules.d/99-hot-macropad.rules`:
+`idProduct`. Then create `/etc/udev/rules.d/99-hot-macropad.rules`. In this
+example, `editing-pad` is the custom name chosen for the device:
 
 ```udev
-SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="1234", ATTRS{idProduct}=="5678", ENV{ID_INPUT_KEYBOARD}=="1", SYMLINK+="input/hot-macropad"
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="1234", ATTRS{idProduct}=="5678", ENV{ID_INPUT_KEYBOARD}=="1", SYMLINK+="input/editing-pad"
 ```
 
 Replace `1234` and `5678` with the values reported for your device. If more
-than one connected device has the same vendor and product IDs, add a serial
-number to distinguish it:
+than one connected device has the same vendor and product IDs, add its serial
+number to the same rule to distinguish it:
 
 ```udev
-ATTRS{serial}=="DEVICE_SERIAL_NUMBER"
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="1234", ATTRS{idProduct}=="5678", ATTRS{serial}=="DEVICE_SERIAL_NUMBER", ENV{ID_INPUT_KEYBOARD}=="1", SYMLINK+="input/editing-pad"
 ```
+
+Additional devices can have their own rules and names, for example
+`input/streaming-pad`.
 
 Reload the rules and reconnect the device:
 
@@ -186,47 +192,34 @@ sudo udevadm trigger
 Verify that the alias exists:
 
 ```
-ls -l /dev/input/hot-macropad
+ls -l /dev/input/editing-pad
 ```
 
 ### Use the Alias in the Service
 
-Override the systemd unit:
+Convert the full alias path to a systemd instance name:
 
 ```
-systemctl --user edit hot-macropad@my-device.service
+systemd-escape --path /dev/input/editing-pad
 ```
 
-Add:
+This prints `dev-input-editing\x2dpad`. Use that value to enable and start the
+service:
 
-```ini
-[Service]
-ExecStart=
-ExecStart=/usr/bin/hot-macropad /dev/input/hot-macropad
+```bash
+systemctl --user enable --now 'hot-macropad@dev-input-editing\x2dpad.service'
 ```
 
-Then enable and start the service:
-
-```
-systemctl --user enable hot-macropad@my-device.service
-systemctl --user start  hot-macropad@my-device.service
-```
+Repeat these steps with a unique alias and service instance for each device.
 
 ### Direct eventX Fallback
 
-For temporary use or troubleshooting, the service can point directly to an
-event device:
+For temporary use or troubleshooting, an `eventX` path can also be converted
+to a service instance:
 
 ```
-systemctl --user edit hot-macropad@my-device.service
-```
-
-Add:
-
-```
-[Service]
-ExecStart=
-ExecStart=/usr/bin/hot-macropad /dev/input/event12
+systemd-escape --path /dev/input/event12
+systemctl --user start hot-macropad@dev-input-event12.service
 ```
 
 > Note: `eventX` numbers may change between reboots.

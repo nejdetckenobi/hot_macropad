@@ -4,7 +4,7 @@ After=graphical.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/hot-macropad /dev/input/by-id/%i default
+ExecStart=/usr/bin/hot-macropad %I default
 Restart=on-failure
 RestartSec=3
 
