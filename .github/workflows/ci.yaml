@@ -22,20 +22,76 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential \
-            debhelper \
-            devscripts \
-            fakeroot \
             lintian
 
-      - name: Build Debian package
+      - name: Read and validate version
+        id: version
         run: |
-          dpkg-buildpackage -us -uc
+          version="$(tr -d '[:space:]' < VERSION)"
+          test -n "$version"
+          dpkg --validate-version "$version"
 
-      - name: Collect deb artifacts
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            tag="${GITHUB_REF#refs/tags/}"
+            test "$tag" = "$version" || {
+              echo "Tag $tag does not match VERSION $version" >&2
+              exit 1
+            }
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Build Debian package
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
+          package_root="build/hot-macropad_${VERSION}_all"
+
+          install -Dm755 hot-macropad "$package_root/usr/bin/hot-macropad"
+          install -Dm644 hot-macropad@.service \
+            "$package_root/usr/lib/systemd/user/hot-macropad@.service"
+          install -Dm644 README.md \
+            "$package_root/usr/share/doc/hot-macropad/README.md"
+          install -Dm644 LICENSE \
+            "$package_root/usr/share/doc/hot-macropad/copyright"
+          gzip -9n -c CHANGELOG.md > \
+            "$package_root/usr/share/doc/hot-macropad/CHANGELOG.md.gz"
+          release_date="$(date --utc --date="@$(git show -s --format=%ct)" --rfc-email)"
+          printf '%s\n' \
+            "hot-macropad ($VERSION) unstable; urgency=medium" \
+            '' \
+            "  * Release $VERSION." \
+            '' \
+            " -- Nejdet Çağdaş Yücesoy <nejdetyucesoy@gmail.com>  $release_date" \
+            | gzip -9n > \
+              "$package_root/usr/share/doc/hot-macropad/changelog.gz"
+          chmod 0644 "$package_root/usr/share/doc/hot-macropad/CHANGELOG.md.gz"
+          chmod 0644 "$package_root/usr/share/doc/hot-macropad/changelog.gz"
+
+          mkdir -p "$package_root/DEBIAN"
+          tee "$package_root/DEBIAN/control" >/dev/null <<EOF
+          Package: hot-macropad
+          Version: $VERSION
+          Section: utils
+          Priority: optional
+          Architecture: all
+          Maintainer: Nejdet Çağdaş Yücesoy <nejdetyucesoy@gmail.com>
+          Depends: evtest
+          Recommends: xdotool
+          Description: Script-driven macropad daemon using evdev
+           Hot Macropad is a user-level daemon that binds Linux input devices
+           to executable scripts. Each key can trigger a shell script and
+           scripts may request page switches at runtime.
+          EOF
+
           mkdir -p artifacts
-          cp ../*.deb artifacts/
+          dpkg-deb --build --root-owner-group "$package_root" \
+            "artifacts/hot-macropad_${VERSION}_all.deb"
+
+      - name: Validate Debian package
+        run: |
+          dpkg-deb --info artifacts/*.deb
+          lintian artifacts/*.deb
 
       - name: Upload deb artifact
         uses: actions/upload-artifact@v4
