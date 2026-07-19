@@ -11,10 +11,15 @@ if [[ $# -lt 1 || $# -gt 2 ]]; then
 fi
 
 DEVICE_ARG="$1"
-# Preserve compatibility with service instances that contain only a by-id
-# entry name. Absolute paths are used as provided.
+# Absolute paths are used as provided. Plain names preserve compatibility with
+# /dev/input/by-id service instances. Path-based systemd instances are decoded
+# only when no matching by-id entry exists.
 if [[ "$DEVICE_ARG" == /* ]]; then
     DEVICE="$DEVICE_ARG"
+elif [[ -e "/dev/input/by-id/$DEVICE_ARG" ]]; then
+    DEVICE="/dev/input/by-id/$DEVICE_ARG"
+elif [[ "$DEVICE_ARG" == dev-input-* ]]; then
+    DEVICE="$(systemd-escape --unescape --path "$DEVICE_ARG")"
 else
     DEVICE="/dev/input/by-id/$DEVICE_ARG"
 fi
