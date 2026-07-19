@@ -1,8 +1,9 @@
-hot-macropad (0.2.0) UNRELEASED; urgency=medium
+hot-macropad (0.2.1) UNRELEASED; urgency=medium
 
   * Add support for persistent, custom-named input device aliases.
   * Support multiple macropads through path-based systemd instances.
   * Preserve compatibility with existing /dev/input/by-id instances.
+  * Propagate evtest failures so systemd can restart disconnected devices.
 
  -- Nejdet Çağdaş Yücesoy <nejdetyucesoy@gmail.com>  Sun, 19 Jul 2026 12:06:51 +0300
 

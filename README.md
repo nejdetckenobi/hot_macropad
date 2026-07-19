@@ -12,7 +12,7 @@ It listens to input events from a macropad device and executes user-defined scri
 Install the downloaded `.deb` package:
 
 ```
-sudo dpkg -i hot-macropad_0.2.0_all.deb
+sudo dpkg -i hot-macropad_0.2.1_all.deb
 ```
 
 If dependency errors occur:
